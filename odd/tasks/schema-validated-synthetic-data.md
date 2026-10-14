@@ -123,3 +123,25 @@ carries T1-T6; T0 is the initial commit on `main` because it creates the reposit
   `model.LLM` for tests.
 - **L6 (evidence — toolchain):** local `go1.26.4` with `GOTOOLCHAIN=auto`; the sibling modules declare `go 1.26.5`,
   so the toolchain is downloaded on demand. `google.golang.org/adk/v2@v2.2.0` is present in the module cache.
+- **L7 (evidence — dependency pinning):** the first `go mod tidy`, run before the ADK requirement existed, resolved
+  `google.golang.org/adk/v2 v2.6.0` and reported `requires go >= 1.26.6; switching to go1.26.9`, which would have
+  moved the toolchain and the `go` directive away from every sibling module. The ADK requirement was therefore added
+  explicitly (`go get google.golang.org/adk/v2@v2.2.0 google.golang.org/genai@v1.66.0`) and the directive kept at
+  `go 1.26.5`. Tidy does not upgrade an existing requirement; it only fills in what is missing.
+- **L8 (evidence — validation surface):** the reference specification inside `internal/validate` produces 39 checks
+  and `testdata/support-tickets.json` produces 41. Both totals are asserted exactly, so a rule that silently stops
+  being checked fails a test instead of shrinking the report.
+- **L9 (evidence — ADK substitutes braces in the instruction):** the first run of the `internal/agent` tests failed
+  with `run spec compiler: failed to append instructions: failed to inject session state into instruction: state key
+  does not exist`. `llmagent.Config.Instruction` resolves placeholders shaped like `{key_name}` against session
+  state, and the instruction teaches the `{seq}` and `{word}` pattern tokens by name, so the run failed before the
+  model was called. The documented escape — `llmagent.Config.InstructionProvider`, which performs no substitution —
+  is used instead, and a regression test asserts that `{seq}`, `{seq:W}` and `{word}` reach the model verbatim.
+- **L10 (verification evidence, close):** on `feat/seeded-generation-pipeline` before the merge: `gofmt -l .` clean,
+  `go vet ./...` clean, `go test -race -count=1 ./...` green for all six packages, two runs of
+  `go run . -spec testdata/support-tickets.json -json` byte-identical at 13343 bytes, the preview printing 6 customers
+  and 12 tickets with `validation: 41 of 41 declared rules hold`, and the built binary returning 0 for a valid batch, 2
+  for a usage error, and 3 for a refused specification. `gentle_review` assess reported risk `medium`
+  (`configuration_change` on `go.mod`), `reviewDue: false`, `independentVerifier: false`, both because the candidate is
+  under the review budget and because the writer profile is `large`, so no native review was started. The owner then
+  chose to merge this branch into `main` and push.

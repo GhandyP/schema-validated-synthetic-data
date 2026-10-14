@@ -1,13 +1,24 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/GhandyP/schema-validated-synthetic-data/internal/agent"
+	"github.com/GhandyP/schema-validated-synthetic-data/internal/cli"
 )
 
-// main is replaced by the real entry point once the pipeline lands; until then it
-// reports that the repository is under construction instead of pretending to run.
 func main() {
-	fmt.Fprintln(os.Stderr, "schema-validated-synthetic-data is under construction; see odd/tasks/schema-validated-synthetic-data.md")
-	os.Exit(1)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+
+	code := cli.Run(ctx, os.Args[1:], cli.Deps{
+		NewCompiler: func(ctx context.Context) (agent.Compiler, error) {
+			return agent.NewGeminiCompiler(ctx)
+		},
+	}, os.Stdout, os.Stderr)
+
+	stop()
+	os.Exit(code)
 }
