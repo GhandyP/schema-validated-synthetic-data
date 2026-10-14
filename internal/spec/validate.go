@@ -238,7 +238,7 @@ func (f Field) validate(e Entity) Problems {
 		}
 
 	default:
-		add("type %q is not one of %s", f.Type, strings.Join(supportedTypes(), ", "))
+		add("type %q is not one of %s", f.Type, strings.Join(FieldTypes(), ", "))
 	}
 
 	return problems
@@ -445,8 +445,10 @@ func indexOf(values []string, want string) int {
 	return 0
 }
 
-// supportedTypes lists the field types in the order they are reported.
-func supportedTypes() []string {
+// FieldTypes lists the field types this package accepts, in the order they are
+// reported. The ADK output schema is built from this list, so the model is
+// offered exactly the types the validator accepts.
+func FieldTypes() []string {
 	return []string{
 		string(TypeString),
 		string(TypeInteger),
