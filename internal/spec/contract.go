@@ -139,27 +139,32 @@ type EntityData struct {
 // SyntheticDataset is the result of one run: the records, the seed that produced
 // them, the assumptions behind them, and the validator's verdict.
 type SyntheticDataset struct {
-	Spec        DatasetSpec       `json:"spec"`
-	Seed        int64             `json:"seed"`
-	Entities    []EntityData      `json:"entities"`
+	Spec      DatasetSpec  `json:"spec"`
+	Seed      int64        `json:"seed"`
+	Synthetic bool         `json:"synthetic"`
+	Entities  []EntityData `json:"entities"`
+
 	Assumptions []string          `json:"assumptions,omitempty"`
 	Validation  *ValidationReport `json:"validation,omitempty"`
 }
 
-// ValidationReport is the validator's verdict over one dataset. Total is the
-// number of rules checked, so a report that passed says how much was proven.
-type ValidationReport struct {
-	Passed   bool     `json:"passed"`
-	Total    int      `json:"total"`
-	Checked  []Check  `json:"checked"`
-	Failures []string `json:"failures,omitempty"`
-}
-
-// Check is a single rule the validator re-derived from the spec.
+// Check is one rule the validator re-derived from the spec, with the verdict it
+// reached. Passing checks are kept as well: a report that claims twelve rules were
+// checked should be able to list them.
 type Check struct {
 	Rule    string `json:"rule"`
 	Subject string `json:"subject"`
 	Detail  string `json:"detail"`
+	Passed  bool   `json:"passed"`
+}
+
+// ValidationReport is the validator's verdict over one dataset. Total is the
+// number of rules checked, so a passing report says how much was proven rather
+// than only that nothing was found.
+type ValidationReport struct {
+	Passed  bool    `json:"passed"`
+	Total   int     `json:"total"`
+	Checked []Check `json:"checked"`
 }
 
 // Record holds one generated row in field order, so the JSON output is stable
