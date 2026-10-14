@@ -1,0 +1,11 @@
+{
+  "name": "flags",
+  "seed": 1,
+  "entities": [
+    {
+      "name": "flag",
+      "count": 3,
+      "fields": [{ "name": "on", "type": "boolean", "unique": true }]
+    }
+  ]
+}

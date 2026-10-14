@@ -1,0 +1,19 @@
+{
+  "name": "visits",
+  "seed": 2,
+  "entities": [
+    {
+      "name": "visit",
+      "count": 5,
+      "fields": [
+        {
+          "name": "day",
+          "type": "date",
+          "unique": true,
+          "min_date": "2026-01-01",
+          "max_date": "2026-01-03"
+        }
+      ]
+    }
+  ]
+}

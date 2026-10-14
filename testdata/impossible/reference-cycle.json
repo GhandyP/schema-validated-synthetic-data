@@ -1,0 +1,14 @@
+{
+  "name": "cycle",
+  "seed": 3,
+  "entities": [
+    {
+      "name": "node",
+      "count": 2,
+      "fields": [
+        { "name": "id", "type": "string", "unique": true, "pattern": "N-{seq}" },
+        { "name": "parent_id", "type": "reference", "references": "node.id" }
+      ]
+    }
+  ]
+}
